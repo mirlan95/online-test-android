@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Diplom</string>
+    <string name="username_text">username:</string>
+    <string name="password_text">password:</string>
+    <string name="button_login">login</string>
+    <string name="username_hint">1304.01009</string>
+    <string name="radio_text">In the central Asia</string>
+    <string name="a">a)</string>
+    <string name="b">b)</string>
+    <string name="c">c)</string>
+    <string name="d">d)</string>
+    <string name="e">e)</string>
+    <string name="internet">Повторить</string>
+    <string name="send">Отправить</string>
+    <string name="prev">Prev</string>
+    <string name="next">Next</string>
+
+</resources>
