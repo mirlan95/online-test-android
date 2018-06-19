@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.example.mirlan.diplom.Activity.QuestionActivity
-import com.example.mirlan.diplom.Activity.QuestionActivity.Companion.radioPositionIsChecked
 import com.example.mirlan.diplom.Activity.QuestionActivity.Companion.resultArray
 import com.example.mirlan.diplom.R
 import com.example.mirlan.diplom.model.Answer
@@ -21,17 +20,13 @@ class QuestionAdapter(private val questionList: ArrayList<Question>, private val
 
     val context: Context = QuestionActivity.applicationContext()
 
-    companion object {
-
-     //   var sum:Int = 0
-
-    }
+    companion object { //   var sum:Int = 0
+         }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val pos: Int = position + 1
 
-        radioPositionIsChecked[position] = 1
-        holder.questionText?.text = ("" + pos + ") " + questionList[position].question)
+        holder.questionText.text = ("" + pos + ") " + questionList[position].question)
 
         if(questionList[position].img!=null)
         Picasso.get().load(questionList[position].img).into(holder.img)
@@ -40,11 +35,11 @@ class QuestionAdapter(private val questionList: ArrayList<Question>, private val
         getAnswersForOnePosition(questionList[position].questionId)
 
         if (radioList[0] != "no") {
-            holder.radio1?.text = radioList[0]
+            holder.radio1.text = radioList[0]
             holder.linear1.visibility = View.VISIBLE
         }
         if (radioList[1] != "no") {
-            holder.radio2?.text = radioList[1]
+            holder.radio2.text = radioList[1]
             holder.linear2.visibility = View.VISIBLE
         }
         if (radioList[2] != "no") {
@@ -63,34 +58,26 @@ class QuestionAdapter(private val questionList: ArrayList<Question>, private val
 
         holder.radio1.setOnClickListener {
 
-           // holder.radio1.isChecked = radioPositionIsChecked[position] == 1
             holder.radio2.isChecked = false//
-           // Toast.makeText(context,"pos $position",Toast.LENGTH_LONG).show()
+            //Toast.makeText(context,"pos $position",Toast.LENGTH_LONG).show()
             holder.radio3.isChecked = false
             holder.radio4.isChecked = false
             holder.radio5.isChecked = false
 
-
-            if(getRightAnswer(holder.questionText.text.removeRange(0,3),holder.radio1.text,position)){
-                resultArray[position] = 1
-
-            }else resultArray[position] = 0
-           /// Toast.makeText(context,"position" + position + holder.radioGroup.checkedRadioButtonId,Toast.LENGTH_LONG).show()
-           // getTestResult()
-
+            if(getRightAnswer(holder.radio1.text, questionList[position].questionId, position))
+                setRight(position)
+            else setWrong(position)
     }
         holder.radio2.setOnClickListener{
-           // holder.radio2.isChecked = radioPositionIsChecked[position] == 1
+
             holder.radio1.isChecked = false
             holder.radio3.isChecked = false
             holder.radio4.isChecked = false
             holder.radio5.isChecked = false
 
-            if(getRightAnswer(holder.questionText.text.removeRange(0,3), holder.radio2.text, position)){
-                resultArray[position] = 1
-            }else resultArray[position] = 0
-           // Toast.makeText(context,"h"+holder.radioGroup.checkedRadioButtonId,Toast.LENGTH_SHORT).show()
-            //getTestResult()
+            if(getRightAnswer(holder.radio2.text, questionList[position].questionId, position))
+                setRight(position)
+            else setWrong(position)
         }
         holder.radio3.setOnClickListener {
 
@@ -98,21 +85,23 @@ class QuestionAdapter(private val questionList: ArrayList<Question>, private val
             holder.radio2.isChecked = false
             holder.radio4.isChecked = false
             holder.radio5.isChecked = false
-            if(getRightAnswer(holder.questionText.getText().removeRange(0,3), holder.radio3.getText(), position)){
-                resultArray[position] = 1
-            }else resultArray[position] = 0
-            //getTestResult()
+
+            if(getRightAnswer(holder.radio3.text, questionList[position].questionId, position))
+                setRight(position)
+            else setWrong(position)
+
         }
         holder.radio4.setOnClickListener{
 
-            holder.radio1.isChecked = false// Toast.makeText(context,"SD" + checkedId,Toast.LENGTH_LONG).show()
+            holder.radio1.isChecked = false
             holder.radio2.isChecked = false
             holder.radio3.isChecked = false
             holder.radio5.isChecked = false
-            if(getRightAnswer(holder.questionText.getText().removeRange(0,3), holder.radio4.getText(), position)){
-                resultArray[position] = 1
-            }else resultArray[position] = 0
-            //getTestResult()
+
+            if(getRightAnswer(holder.radio4.text, questionList[position].questionId, position))
+                setRight(position)
+            else setWrong(position)
+
         }
         holder.radio5.setOnClickListener{
 
@@ -120,18 +109,17 @@ class QuestionAdapter(private val questionList: ArrayList<Question>, private val
             holder.radio2.isChecked = false
             holder.radio3.isChecked = false
             holder.radio4.isChecked = false
-            if(getRightAnswer(holder.questionText.text.removeRange(0,3), holder.radio5.getText(), position)){
-                resultArray[position] = 1
-            }else resultArray[position] = 0
-            //getTestResult()
+
+            if(getRightAnswer(holder.radio5.text, questionList[position].questionId,position))
+                setRight(position)
+            else setWrong(position)
+
         }
-        //notifyItemChanged(position)
-       // notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder{
 
-        val view = LayoutInflater.from(parent?.context).inflate(R.layout.question_item,parent,false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.question_item,parent,false)
 
         return ViewHolder(view)
     }
@@ -180,29 +168,28 @@ class QuestionAdapter(private val questionList: ArrayList<Question>, private val
             }
         }
     }
-    private fun getRightAnswer(text: CharSequence, text1: CharSequence, position: Int): Boolean {
-        var k = questionList.size
-        var t = answerList.size
-        var qId: Int
-        var ansId:Int
-        k--
-        t--
-        for(i in 0..k){
-            if(questionList[i].question == text.toString()){
-                 qId = questionList[i].questionId
-                for(j in 0..t){
-                    if(answerList[j].answer == text1.toString() && answerList[j].questionId == qId){
-                        if(answerList[j].answer == text1.toString()){
-                            ansId = answerList[j].answerId
-                            initExamData(qId,ansId,position)
-                        }
-                        if(answerList[j].right == 1)return true
-                    }
+
+    private fun getRightAnswer(text: CharSequence, questionId: Int, position: Int): Boolean {
+
+        for(i in 0 until answerList.size){
+
+            if(answerList[i].questionId == questionId){
+
+                if(answerList[i].answer == text.toString()) {
+
+                    initExamData(questionId, answerList[i].answerId, position)
+                    if (answerList[i].right == 1) return true
                 }
             }
         }
 
         return false
+    }
+    private fun setRight(pos: Int){
+        resultArray[pos] = 1
+    }
+    private fun setWrong(pos: Int){
+        resultArray[pos] = 0
     }
 
     private fun initExamData(qId: Int, ansId: Int,position: Int) {

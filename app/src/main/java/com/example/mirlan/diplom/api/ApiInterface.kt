@@ -10,7 +10,7 @@ import retrofit2.http.*
 /**
  * Created by mirlan on 5/13/18.
  */
-public interface ApiInterface {
+ interface ApiInterface {
 
     @GET("/exams")
     fun getExam() : Observable<List<Exam>>
@@ -42,7 +42,7 @@ public interface ApiInterface {
             val requestInterface = Retrofit.Builder()
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create())
-                    .baseUrl("http://192.168.1.123:8080")
+                    .baseUrl("http://192.168.130.92:8080")
                     .build()
             return requestInterface.create(ApiInterface::class.java)
         }

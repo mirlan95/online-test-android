@@ -29,6 +29,9 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_question.*
 import kotlinx.android.synthetic.main.recycler_item_row.*
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
+import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 class QuestionActivity : AppCompatActivity() {
@@ -70,7 +73,7 @@ class QuestionActivity : AppCompatActivity() {
     }
 
     companion object {
-        var radioPositionIsChecked = arrayListOf<Int>()
+
         var resultArray = arrayListOf<Int>()
         var resultList = arrayListOf<String>()
         @SuppressLint("StaticFieldLeak")
@@ -155,6 +158,7 @@ class QuestionActivity : AppCompatActivity() {
 
         questionList = ArrayList(mQuestionList)
         getAnswer(mQuestionList)
+        setNullArray()
        // Toast.makeText(this,"QUESTIONLIST " + mQuestionList.size.toString(),Toast.LENGTH_LONG).show()
 
     }
@@ -194,7 +198,7 @@ class QuestionActivity : AppCompatActivity() {
         pDialog.dismiss()
         startTime(examTime.toLong())
         btn_send.visibility = View.VISIBLE
-        setNullArray()
+
     }
     private fun answerError(errorThrowable: Throwable) {
 
@@ -204,7 +208,7 @@ class QuestionActivity : AppCompatActivity() {
     }
 
     private fun sendResult(){
-    var testResult:Int = (100 / questionList?.size!!) * sum
+    val testResult:Int = (100 / questionList?.size!!) * sum
         //if(testResult==0)testResult = -1
         var examData:String?=null
         examData = "a:" + studentId.toString() + ":{\n" +
@@ -217,6 +221,7 @@ class QuestionActivity : AppCompatActivity() {
         }
 
         examData+="}"
+      //  examData+=resultArray.toString()
 
                 mCompositeDisposable3 = client.sendResult(testResult,studentId,examId,examData)//QuestionAdapter.resultAnswer.toString())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -241,9 +246,10 @@ class QuestionActivity : AppCompatActivity() {
         for(i in 0..len) {
             resultArray.add(i,0)
             resultList.add(i,"")
-            radioPositionIsChecked.add(i,0)
+
         }
     }
+
     private fun showDialog(){
         // Late initialize an alert dialog object
         lateinit var dialog: AlertDialog
@@ -291,14 +297,14 @@ class QuestionActivity : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun startTime(examTime: Long) {
+    private fun startTime(examTim: Long) {
 
-         var min = examTime - 1
-         var examTime = examTime
+         var min = examTim - 1
+         var examTime = examTim
          examTime *= 60000
          var c = 0
          var t = 60
-         var timer = object: CountDownTimer(examTime,1000){
+         val timer = object: CountDownTimer(examTime,1000){
 
              override fun onTick(millisUntilFinished: Long) {
                    c++
@@ -320,35 +326,50 @@ class QuestionActivity : AppCompatActivity() {
          }
         timer.start()
     }
-    private fun getTestResult(){
+    private fun startOnstopTimer(){
+        val timer = object: CountDownTimer(5000,1000){
+            override fun onFinish() {
+                sendResult()
+            }
+
+            override fun onTick(millisUntilFinished: Long) {
+            millisUntilFinished / 1000
+            }
+
+        }
+        timer.start()
+    }
+    private fun getTestResult() {
 
         var len = questionList!!.size
         len--
         sum = 0
-        for(i in 0..len) sum += resultArray[i]
-      //  Toast.makeText(context,"sum = $sum",Toast.LENGTH_SHORT).show()
+        for (i in 0..len) sum += resultArray[i]
+        //  Toast.makeText(context,"sum = $sum",Toast.LENGTH_SHORT).show()
     }
 
     lateinit var pDialog: ProgressDialog
     private fun DisplayProgressDialog() {
 
         pDialog = ProgressDialog(this@QuestionActivity)
-        pDialog!!.setMessage("Loading..")
-        pDialog!!.setCancelable(false)
-        pDialog!!.isIndeterminate = false
-        pDialog!!.show()
+        pDialog.setMessage("Loading..")
+        pDialog.setCancelable(false)
+        pDialog.isIndeterminate = false
+        pDialog.show()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        Toast.makeText(this,"onDestroy",Toast.LENGTH_LONG).show()
+        sendResult()
         mCompositeDisposable?.clear()
         mCompositeDisposable2?.clear()
 
     }
-    /*
+
     override fun onPause() {
         super.onPause()
-       // Toast.makeText(this,"onREsume",Toast.LENGTH_LONG).show()
+        Toast.makeText(this,"onPause",Toast.LENGTH_LONG).show()
         //sendResult()
         //mCompositeDisposable3!!.dispose()
         Log.e("ONSTOP","pause")
@@ -356,37 +377,36 @@ class QuestionActivity : AppCompatActivity() {
 
     override fun onResume() {
 
-        //Toast.makeText(this,"onResume",Toast.LENGTH_LONG).show()
+
+        Toast.makeText(this,"onResume",Toast.LENGTH_LONG).show()
        // sendResult()
         super.onResume()
 
-        Log.e("ONSTOP","REsume")
     }
 
     override fun onStop() {
-        //Toast.makeText(this,"onStop",Toast.LENGTH_LONG).show()
+        Toast.makeText(this,"onStop",Toast.LENGTH_LONG).show()
         super.onStop()
-        sendResult()
-        super.finishAffinity()
-        super.finish()
-        super.finishActivity(1)
-        Log.e("ONSTOP","STOOP")
+        startOnstopTimer()
+        //endResult()
+        //super.finishAffinity()
+        //super.finish()
+       //super.finishAct
     }
-*/
+
     override fun onBackPressed() {
 
         val alert =  AlertDialog.Builder(this)
                 .setTitle("Really Exit?")
                 .setMessage("Are you sure you want to exit?")
                 .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes, {
-                    _, _ ->
+                .setPositiveButton(android.R.string.yes) { _, _ ->
                     pDialog.show()
                     sendResult()
                     super.onBackPressed()
                     finishAffinity()
                     System.exit(0)
-                })
+                }
         alert.show()
     }
 }
