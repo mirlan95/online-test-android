@@ -28,8 +28,7 @@ class ExamAdapter(private val examList: ArrayList<Exam>, private val listener: L
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int){
 
-        holder.bind(examList[position], listener, position)
-       // holder?.examName?.text = examList[position].exam
+        holder.bind(examList[position], listener)
 
     }
 
@@ -45,26 +44,15 @@ class ExamAdapter(private val examList: ArrayList<Exam>, private val listener: L
 
 
         @SuppressLint("SimpleDateFormat")
-        fun bind(mExam :Exam, listener: Listener, position: Int){
-           // val date = LocalDateTime.parse(mExam.time.toString())
-            //val currentData = LocalDateTime.now()
-            //val form = currentData.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"))
-            val day = Calendar.getInstance()
-
-            ///val month = Calendar.MONTH
-            val sdf = SimpleDateFormat("yyyy-MM-dd")
+        fun bind(mExam :Exam, listener: Listener){
+            val sdf = SimpleDateFormat("dd.MM.yyyy")
             val currentDate = sdf.format(Date())
             val serverDate = mExam.date?.substring(0..9)
-            //val mMonth = mExam.date?.substring(5..6)?.toInt()
 
-            //Toast.makeText()
-            if(mExam.enabled == 1 && serverDate == currentDate) {
+            if(mExam.enabled == 1 && serverDate == currentDate)
                 itemView.examName.text = mExam.exam
-                itemView.dateText.text = mExam.date
-
-            }else{
+            else
                 itemView.card_view.visibility = View.GONE
-            }
 
                 itemView.setOnClickListener{listener.onItemClick(mExam)}
 

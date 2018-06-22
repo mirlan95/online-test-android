@@ -1,5 +1,6 @@
 package com.example.mirlan.diplom.Activity
 
+
 import android.app.ProgressDialog
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -21,6 +22,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_login.view.*
 import kotlinx.android.synthetic.main.activity_main.*
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity(),ExamAdapter.Listener {
 
     private var mCompositeDisposable: CompositeDisposable? = null
@@ -29,23 +31,23 @@ class MainActivity : AppCompatActivity(),ExamAdapter.Listener {
 
     private var mExamAdapter: ExamAdapter? = null
 
-    private lateinit var internetBtn:Button
+    private lateinit var mInternetBtn:Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        internetBtn = findViewById(R.id.internet_btn)
+        mInternetBtn = findViewById(R.id.internet_btn)
 
         mCompositeDisposable = CompositeDisposable()
 
         initRecyclerView()
 
-        DisplayProgressDialog()
+        displayProgressDialog()
 
         getExamDate()
 
-        internetBtn.setOnClickListener {
+        mInternetBtn.setOnClickListener {
 
             pDialog.show()
             getExamDate()
@@ -64,13 +66,14 @@ class MainActivity : AppCompatActivity(),ExamAdapter.Listener {
     private fun getExamDate() {
 
         if (!NetworkConnection.isNetworkConnected(this)) {
+
             Toast.makeText(this, "Error Internet connection!", Toast.LENGTH_SHORT).show()
             recyclerView.visibility = View.GONE
-            internetBtn.visibility = View.VISIBLE
+            mInternetBtn.visibility = View.VISIBLE
             pDialog.dismiss()
         } else{
             recyclerView.visibility = View.VISIBLE
-            internetBtn.visibility = View.GONE
+            mInternetBtn.visibility = View.GONE
 
         }
 
@@ -97,13 +100,12 @@ class MainActivity : AppCompatActivity(),ExamAdapter.Listener {
 
         pDialog.dismiss()
         recyclerView.visibility = View.GONE
-        internetBtn.visibility = View.VISIBLE
+        mInternetBtn.visibility = View.VISIBLE
         Toast.makeText(this, "Error ${errorThrowable.localizedMessage}", Toast.LENGTH_SHORT).show()
     }
 
     override fun onItemClick(mExam: Exam) {
 
-       // Toast.makeText(this, "${mExam.time} Clicked !", Toast.LENGTH_SHORT).show()
         val intent = Intent(this, LoginActivity::class.java)
         intent.putExtra("key",mExam.examId)
         intent.putExtra("time",mExam.time)
@@ -117,13 +119,13 @@ class MainActivity : AppCompatActivity(),ExamAdapter.Listener {
     }
 
     lateinit var pDialog: ProgressDialog
-    fun DisplayProgressDialog() {
+    private fun displayProgressDialog() {
 
         pDialog = ProgressDialog(this@MainActivity)
-        pDialog!!.setMessage("Loading..")
-        pDialog!!.setCancelable(false)
-        pDialog!!.isIndeterminate = false
-        pDialog!!.show()
+        pDialog.setMessage("Loading..")
+        pDialog.setCancelable(false)
+        pDialog.isIndeterminate = false
+        pDialog.show()
     }
 }
 

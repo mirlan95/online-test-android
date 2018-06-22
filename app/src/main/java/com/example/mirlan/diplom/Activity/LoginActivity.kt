@@ -4,7 +4,6 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -15,13 +14,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
+@Suppress("DEPRECATION")
 class LoginActivity : AppCompatActivity() {
 
-    lateinit var mUserName:EditText
-    lateinit var mPassword:EditText
-    var mCompositeDisposable: Disposable? = null
-    private var examId:Int = 1
-    private var examTime:Int = 50
+    private lateinit var mUserName:EditText
+    private lateinit var mPassword:EditText
+    private var mCompositeDisposable: Disposable? = null
+    private var mExamId:Int = 1
+    private var mExamTime:Int = 50
     private var mExamName:String?=null
 
     private val client by lazy {
@@ -31,8 +31,8 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        examId = intent.getIntExtra("key",1)
-        examTime = intent.getIntExtra("time",50)
+        mExamId = intent.getIntExtra("key",1)
+        mExamTime = intent.getIntExtra("time",50)
         mExamName =intent.getStringExtra("examName")
 
         mPassword = findViewById(R.id.edittext_password)
@@ -42,7 +42,7 @@ class LoginActivity : AppCompatActivity() {
 
             if(isUserNameValid() && mPassword.text.toString().isNotEmpty()){
 
-                DisplayProgressDialog()
+                displayProgressDialog()
                 logIn()
 
             }else if(!isUserNameValid()) {
@@ -59,19 +59,19 @@ class LoginActivity : AppCompatActivity() {
 
         if(!NetworkConnection.isNetworkConnected(this))
             Toast.makeText(this,"Check your connection!",Toast.LENGTH_LONG).show()
-        mCompositeDisposable = client.logIn(mUserName.text.toString(),mPassword.text.toString(),examId)
+        mCompositeDisposable = client.logIn(mUserName.text.toString(),mPassword.text.toString(),mExamId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { result ->
 
-                            if (pDialog!!.isShowing)
+                            if (pDialog.isShowing)
                                 pDialog.dismiss()
-                           // Toast.makeText(this,"Success" + result.msg,Toast.LENGTH_LONG).show()
+
                             if(!result[0].err){
                             val intent = Intent(this, QuestionActivity::class.java)
-                                intent.putExtra("key",examId)
-                                intent.putExtra("time",examTime)
+                                intent.putExtra("key",mExamId)
+                                intent.putExtra("time",mExamTime)
                                 intent.putExtra("number",mUserName.text.toString())
                                 intent.putExtra("id", result[0].studentId)
                                 intent.putExtra("lastName",result[0].lastName)
@@ -81,26 +81,26 @@ class LoginActivity : AppCompatActivity() {
                             else  Toast.makeText(this,"Invalid password or username!",Toast.LENGTH_LONG).show()
                         },
                         {
-                            if (pDialog!!.isShowing)
+                            if (pDialog.isShowing)
                                 pDialog.dismiss()
-                           // Log.e("sddf",error.localizedMessage)
+
                             Toast.makeText(this,"Invalid password or username!",Toast.LENGTH_LONG).show()
                         })
 
     }
 
     private fun isUserNameValid(): Boolean {
-        if(mUserName.length()==10)return true
+        if(mUserName.length() == 10)return true
         return false
     }
-    lateinit var pDialog: ProgressDialog
-    fun DisplayProgressDialog() {
+    private lateinit var pDialog: ProgressDialog
+    private fun displayProgressDialog() {
 
         pDialog = ProgressDialog(this@LoginActivity)
-        pDialog!!.setMessage("Loading..")
-        pDialog!!.setCancelable(false)
-        pDialog!!.isIndeterminate = false
-        pDialog!!.show()
+        pDialog.setMessage("Loading..")
+        pDialog.setCancelable(false)
+        pDialog.isIndeterminate = false
+        pDialog.show()
     }
 
     override fun onPause() {

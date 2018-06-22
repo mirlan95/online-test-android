@@ -20,17 +20,15 @@ class QuestionAdapter(private val questionList: ArrayList<Question>, private val
 
     val context: Context = QuestionActivity.applicationContext()
 
-    companion object { //   var sum:Int = 0
-         }
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val pos: Int = position + 1
 
+        val pos: Int = position + 1
         holder.questionText.text = ("" + pos + ") " + questionList[position].question)
 
-        if(questionList[position].img!=null)
-        Picasso.get().load(questionList[position].img).into(holder.img)
-        else holder.img.visibility = View.GONE
+        if(questionList[position].img != null)
+            Picasso.get().load(questionList[position].img).into(holder.img)
+        else
+            holder.img.visibility = View.GONE
 
         getAnswersForOnePosition(questionList[position].questionId)
 
