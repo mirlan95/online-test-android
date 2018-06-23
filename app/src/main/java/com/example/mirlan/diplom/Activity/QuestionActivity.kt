@@ -28,10 +28,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_question.*
-import kotlinx.android.synthetic.main.recycler_item_row.*
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
-import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 class QuestionActivity : AppCompatActivity() {
@@ -63,7 +59,7 @@ class QuestionActivity : AppCompatActivity() {
 
     private var mCompositeDisposable: CompositeDisposable? = null
     private var mCompositeDisposable2: CompositeDisposable? = null
-    private var mCompositeDisposable3: Disposable? = null
+    private var mCompositeDisposable3: CompositeDisposable? = null//Disposable? = null
 
     init {
         instance = this
@@ -90,6 +86,7 @@ class QuestionActivity : AppCompatActivity() {
 
         mCompositeDisposable = CompositeDisposable()
         mCompositeDisposable2 = CompositeDisposable()
+        mCompositeDisposable3 = CompositeDisposable()
 
         examId = intent.getIntExtra("key",1)
         examTime = intent.getIntExtra("time",50)
@@ -104,10 +101,10 @@ class QuestionActivity : AppCompatActivity() {
         firstNameText = findViewById(R.id.firstName_text)
         numberText = findViewById(R.id.number_text)
 
-        examNameText.text = "Эгзамендин аты: $mExamName"
-        lastNameText.text = "Фамилиясы: $lastName"
-        firstNameText.text = "Аты: $firstName"
-        numberText.text = "Студенттик номери: $stNumber"
+        examNameText.text =  mExamName
+        lastNameText.text =  lastName
+        firstNameText.text = firstName
+        numberText.text = stNumber
 
         sendResultBtn = findViewById(R.id.btn_send)
         prevButton = findViewById(R.id.btn_prev)
@@ -221,13 +218,15 @@ class QuestionActivity : AppCompatActivity() {
         }
 
         examData+="}"
-      //  examData+=resultArray.toString()
+        // examData+=resultArray.toString()
 
-                mCompositeDisposable3 = client.sendResult(testResult,studentId,examId,examData)//QuestionAdapter.resultAnswer.toString())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe({
+                mCompositeDisposable3?.add(ApiInterface.create().sendResult(testResult,studentId,examId,examData) //client.sendResult(testResult,studentId,examId,examData)//QuestionAdapter.resultAnswer.toString())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.io())
+                        .subscribe({
                     pDialog.dismiss()
+                            mCompositeDisposable3?.dispose()
+                    Toast.makeText(this,it.msg,Toast.LENGTH_LONG).show()
                     val intent = Intent(this, LastActivity::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     intent.putExtra("res",testResult)
@@ -236,10 +235,11 @@ class QuestionActivity : AppCompatActivity() {
                     intent.putExtra("firstName",firstName)
                     intent.putExtra("examName",mExamName)
                     startActivity(intent)
-
+                    //mCompositeDisposable3?.dispose()
                 },{
-                    toast("Again")
-                })
+
+                    toast("Error")
+                }))
     }
     private fun setNullArray(){
         val len:Int = questionList!!.size
@@ -259,10 +259,10 @@ class QuestionActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
 
         // Set a title for alert dialog
-        builder.setTitle("Сынакты бутуруу")
+        builder.setTitle("Сынакты бүтүрүү")
 
         // Set a message for alert dialog
-        builder.setMessage("Эгер сынакты бутургон болсонуз YES баскычын басыныз")
+        builder.setMessage("Сиз чын эле сынакты бүтүрүп,тиркемени жабууну каалайсызбы?")
 
         // On click listener for dialog buttons
         val dialogClickListener = DialogInterface.OnClickListener{ _, which ->
@@ -272,19 +272,19 @@ class QuestionActivity : AppCompatActivity() {
                     pDialog.show()
                     sendResult()
                 }
-                DialogInterface.BUTTON_NEGATIVE -> toast("Back")
-                DialogInterface.BUTTON_NEUTRAL -> toast("Cancel")
+               // DialogInterface.BUTTON_NEGATIVE -> toast("Back")
+               // DialogInterface.BUTTON_NEUTRAL -> toast("Cancel")
             }
         }
 
         // Set the alert dialog positive/yes button
-        builder.setPositiveButton("YES",dialogClickListener)
+        builder.setPositiveButton("Оа",dialogClickListener)
 
         // Set the alert dialog negative/no button
-        builder.setNegativeButton("NO",dialogClickListener)
+        builder.setNegativeButton("Жок",dialogClickListener)
 
         // Set the alert dialog neutral/cancel button
-        builder.setNeutralButton("CANCEL",dialogClickListener)
+                // builder.setNeutralButton("CANCEL",dialogClickListener)
 
         // Initialize the AlertDialog using builder object
         dialog = builder.create()
@@ -360,47 +360,29 @@ class QuestionActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Toast.makeText(this,"onDestroy",Toast.LENGTH_LONG).show()
+        //Toast.makeText(this,"onDestroy",Toast.LENGTH_LONG).show()
         sendResult()
         mCompositeDisposable?.clear()
         mCompositeDisposable2?.clear()
+        mCompositeDisposable3?.dispose()
 
     }
 
-    override fun onPause() {
-        super.onPause()
-        Toast.makeText(this,"onPause",Toast.LENGTH_LONG).show()
-        //sendResult()
-        //mCompositeDisposable3!!.dispose()
-        Log.e("ONSTOP","pause")
-    }
-
-    override fun onResume() {
-
-
-        Toast.makeText(this,"onResume",Toast.LENGTH_LONG).show()
-       // sendResult()
-        super.onResume()
-
-    }
 
     override fun onStop() {
-        Toast.makeText(this,"onStop",Toast.LENGTH_LONG).show()
+        //Toast.makeText(this,"onStop",Toast.LENGTH_LONG).show()
         super.onStop()
         startOnstopTimer()
-        //endResult()
-        //super.finishAffinity()
-        //super.finish()
-       //super.finishAct
+
     }
 
     override fun onBackPressed() {
 
         val alert =  AlertDialog.Builder(this)
-                .setTitle("Really Exit?")
-                .setMessage("Are you sure you want to exit?")
-                .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes) { _, _ ->
+                .setTitle("Сынакты бүтүрүү")
+                .setMessage("Сиз чын эле сынакты бүтүрүп,тиркемени жабууну каалайсызбы?")
+                .setNegativeButton("Жок", null)
+                .setPositiveButton("Оа") { _, _ ->
                     pDialog.show()
                     sendResult()
                     super.onBackPressed()

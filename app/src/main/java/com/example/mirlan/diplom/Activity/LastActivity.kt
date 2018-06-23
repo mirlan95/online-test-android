@@ -55,8 +55,8 @@ class LastActivity : AppCompatActivity() {
         val alert =  AlertDialog.Builder(this)
                 .setTitle("Тиркемени жабуу")
                 .setMessage("Сиз чын эле тиркемени жабууну каалайсызбы?")
-                .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes) { _, _ ->
+                .setNegativeButton("Жок", null)
+                .setPositiveButton("Оа") { _, _ ->
                     super.onBackPressed()
                     finishAffinity()
                     System.exit(0)

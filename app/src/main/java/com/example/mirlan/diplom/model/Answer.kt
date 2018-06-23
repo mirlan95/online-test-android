@@ -15,7 +15,7 @@ class Answer {
     @Expose
     var answer: String? = null
 
-    @SerializedName("right")
+    @SerializedName("right_ok")
     @Expose
     var right: Int = 0
 

@@ -42,7 +42,7 @@ import retrofit2.http.*
             val requestInterface = Retrofit.Builder()
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create())
-                    .baseUrl("http://192.168.130.92:8080")
+                    .baseUrl("http://192.168.130.78:8080")
                     .build()
             return requestInterface.create(ApiInterface::class.java)
         }
